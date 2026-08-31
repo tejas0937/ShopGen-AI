@@ -1,0 +1,66 @@
+import ProductCard from "../components/ProductCard";
+
+const products = [
+  {
+    id: 1,
+    title: "Wireless Headphones",
+    price: 2999,
+    rating: 4.5,
+    image: "https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg",
+  },
+  {
+    id: 2,
+    title: "Gaming Keyboard",
+    price: 2499,
+    rating: 4.3,
+    image: "https://fakestoreapi.com/img/61mtL65D4cL._AC_SX679_.jpg",
+  },
+  {
+    id: 3,
+    title: "Casual T-Shirt",
+    price: 999,
+    rating: 4.2,
+    image: "https://fakestoreapi.com/img/71li-ujtlJCL._AC_UX679_.jpg",
+  },
+];
+
+function Products() {
+  return (
+    <div className="products-page">
+      <div className="page-header">
+        <p className="hero-label">SHOPGEN AI</p>
+
+        <h1>Explore Products</h1>
+
+        <p>
+          Browse products and discover something you'll love.
+        </p>
+      </div>
+
+      <div className="filters">
+        <input
+          type="text"
+          placeholder="Search products..."
+        />
+
+        <select>
+          <option value="">All Categories</option>
+          <option value="electronics">Electronics</option>
+          <option value="jewelery">Jewelry</option>
+          <option value="clothing">Clothing</option>
+        </select>
+      </div>
+
+      <div className="product-grid">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default Products;
