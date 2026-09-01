@@ -22,6 +22,9 @@ select {
   font-family: inherit;
 }
 
+button {
+  border: none;
+}
 
 /* =========================
    NAVBAR
@@ -95,6 +98,108 @@ select {
   color: white;
 
   font-size: 13px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-badge {
+  font-size: 14px;
+  color: #3d3d3d;
+  font-weight: 600;
+}
+
+.small-button {
+  padding: 9px 14px;
+  font-size: 13px;
+}
+
+.auth-page {
+  min-height: calc(100vh - 86px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: linear-gradient(180deg, #f7f7f5 0%, #f2f4f8 100%);
+}
+
+.auth-card {
+  width: min(100%, 440px);
+  background: #fff;
+  border: 1px solid #ebebeb;
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(17, 17, 17, 0.06);
+  padding: 32px 28px;
+}
+
+.auth-eyebrow {
+  color: #666;
+  font-size: 11px;
+  letter-spacing: 1.8px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.auth-card h1 {
+  font-size: clamp(32px, 4vw, 42px);
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  color: #222;
+}
+
+.auth-form input {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: #fff;
+}
+
+.auth-form input:focus {
+  outline: 2px solid rgba(23, 23, 23, 0.12);
+  border-color: #888;
+}
+
+.auth-error {
+  background: #fff1f1;
+  border: 1px solid #f2c3c3;
+  color: #9e2b2b;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.auth-submit {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.auth-switch {
+  margin-top: 22px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+}
+
+.auth-switch a {
+  color: #171717;
+  font-weight: 700;
 }
 
 
