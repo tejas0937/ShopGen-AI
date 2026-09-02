@@ -21,6 +21,8 @@ function Register() {
     setIsSubmitting(true);
 
     try {
+      console.log("REGISTER FORM DATA:", formData);
+
       await register(formData);
       navigate("/");
     } catch (submitError) {

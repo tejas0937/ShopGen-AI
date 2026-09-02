@@ -1,76 +1,88 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://127.0.0.1:8000/api";
 
-function getCookie(name) {
-  const cookieValue = document.cookie
-    .split(";")
-    .map((cookie) => cookie.trim())
-    .find((cookie) => cookie.startsWith(`${name}=`));
 
-  return cookieValue ? decodeURIComponent(cookieValue.split("=")[1]) : "";
-}
-
-export async function getCsrfToken() {
+async function getCsrfToken() {
   const response = await fetch(`${API_BASE_URL}/csrf/`, {
     credentials: "include",
   });
 
   if (!response.ok) {
-    const fallbackToken = getCookie("csrftoken");
-    if (fallbackToken) return fallbackToken;
-    throw new Error("Unable to fetch CSRF token");
+    throw new Error("Failed to get CSRF token");
   }
 
-  const data = await response.json();
-  return data.csrfToken || getCookie("csrftoken");
+  return response.json();
 }
 
-export async function apiFetch(path, options = {}) {
-  const csrfToken = await getCsrfToken();
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    credentials: "include",
+async function apiRequest(endpoint, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(options.headers || {}),
-      ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
     },
   });
 
-  const contentType = response.headers.get("content-type") || "";
-  const text = await response.text();
-  const payload = text && contentType.includes("application/json") ? JSON.parse(text) : text;
+  const data = await response.json();
 
   if (!response.ok) {
-    const message = typeof payload === "object" ? payload.detail || payload.error || payload.message : payload;
-    throw new Error(message || "Request failed");
+    throw new Error(
+      data.error || data.detail || "Something went wrong"
+    );
   }
 
-  return payload || null;
+  return data;
 }
 
-export async function registerUser(data) {
-  return apiFetch("/register/", {
+
+export async function registerUser(formData) {
+  const csrfData = await getCsrfToken();
+
+  return apiRequest("/register/", {
     method: "POST",
-    body: JSON.stringify(data),
+    headers: {
+      "X-CSRFToken": csrfData.csrfToken,
+    },
+    body: JSON.stringify({
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+    }),
   });
 }
 
-export async function loginUser(data) {
-  return apiFetch("/login/", {
+
+export async function loginUser(formData) {
+  const csrfData = await getCsrfToken();
+
+  return apiRequest("/login/", {
     method: "POST",
-    body: JSON.stringify(data),
+    headers: {
+      "X-CSRFToken": csrfData.csrfToken,
+    },
+    body: JSON.stringify({
+      username: formData.username,
+      password: formData.password,
+    }),
   });
 }
+
 
 export async function logoutUser() {
-  return apiFetch("/logout/", {
+  const csrfData = await getCsrfToken();
+
+  return apiRequest("/logout/", {
     method: "POST",
+    headers: {
+      "X-CSRFToken": csrfData.csrfToken,
+    },
   });
 }
 
+
 export async function fetchCurrentUser() {
-  return apiFetch("/me/", {
-    method: "GET",
-  });
+  return apiRequest("/me/");
 }
