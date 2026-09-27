@@ -52,6 +52,7 @@ export async function registerUser(formData) {
       password: formData.password,
     }),
   });
+
 }
 
 
@@ -68,6 +69,7 @@ export async function loginUser(formData) {
       password: formData.password,
     }),
   });
+
 }
 
 

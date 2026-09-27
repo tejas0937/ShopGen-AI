@@ -16,23 +16,23 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const syncUser = async () => {
-    try {
-      const response = await fetchCurrentUser();
-      if (response?.user) {
-        setUser(response.user);
-        localStorage.setItem("shopgen-user", JSON.stringify(response.user));
-      } else {
-        setUser(null);
-        localStorage.removeItem("shopgen-user");
-      }
-    } catch {
-      setUser(null);
-      localStorage.removeItem("shopgen-user");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  try {
+    const response = await fetchCurrentUser();
 
+    // /me/ returns the user object directly.
+    setUser(response);
+
+    localStorage.setItem(
+      "shopgen-user",
+      JSON.stringify(response)
+    );
+  } catch {
+    setUser(null);
+    localStorage.removeItem("shopgen-user");
+  } finally {
+    setIsLoading(false);
+  }
+};
   useEffect(() => {
     syncUser();
   }, []);
