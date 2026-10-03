@@ -34,3 +34,52 @@ Generative AI Based Ecommerce Recommendation System.
                          ▼
               Recommendations +
                     Explanation
+
+# WorkFlow
+                    SHOPGEN AI
+                        │
+                        ▼
+              ┌──────────────────┐
+              │ User Registration │
+              │   Login / Logout  │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Product Database │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Product Listing  │
+              │ Search / Filter  │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Product Details  │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ User Interaction │
+              │     Tracking     │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Recommendation   │
+              │     Engine       │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Gemini AI        │
+              │ Explanation      │
+              └────────┬─────────┘
+                       │
+                       ▼
+              ┌──────────────────┐
+              │ Personalized     │
+              │ Recommendations  │
+              └──────────────────┘

@@ -6,6 +6,10 @@ from .views import (
     login_view,
     logout_view,
     current_user,
+    product_list,
+    product_detail,
+    track_interaction,
+    recommendations,
 )
 
 urlpatterns = [
@@ -14,4 +18,19 @@ urlpatterns = [
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
     path("me/", current_user, name="current-user"),
+
+    path("products/", product_list, name="product-list"),
+    path("products/<int:product_id>/", product_detail, name="product-detail"),
+
+    path(
+        "interactions/",
+        track_interaction,
+        name="track-interaction"
+    ),
+
+    path(
+    "recommendations/",
+    recommendations,
+    name="recommendations"
+),
 ]

@@ -1,108 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchRecommendations } from "../services/api";
+import ProductCard from "../components/ProductCard";
 
 function Recommendations() {
+  const [recommendations, setRecommendations] = useState([]);
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [query, setQuery] = useState("");
+  useEffect(() => {
+    async function loadRecommendations() {
+      try {
+        const data = await fetchRecommendations();
 
-  const [submittedQuery, setSubmittedQuery] =
-    useState("");
-
-  const handleRecommend = () => {
-
-    if (!query.trim()) {
-      return;
+        setRecommendations(data.products);
+        setReason(data.reason);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load recommendations.");
+      } finally {
+        setLoading(false);
+      }
     }
 
-    setSubmittedQuery(query);
+    loadRecommendations();
+  }, []);
 
-  };
+  if (loading) {
+    return (
+      <div className="recommendations-page">
+        <h1>AI Recommendations</h1>
+        <p>Finding products for you...</p>
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="recommendations-page">
+        <h1>AI Recommendations</h1>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="recommendations-page">
+      <h1>AI Recommendations</h1>
 
-      <section className="ai-header">
+      <p className="recommendation-reason">
+        {reason}
+      </p>
 
-        <p className="hero-badge">
-          ✦ SHOPGEN AI
-        </p>
-
-        <h1>
-          What are you looking for?
-        </h1>
-
-        <p>
-          Describe what you need in natural language.
-          Our recommendation engine will find suitable products.
-        </p>
-
-      </section>
-
-
-      <section className="recommendation-box">
-
-        <textarea
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Example: I need wireless headphones for gaming under ₹5000..."
-        />
-
-        <div className="recommendation-actions">
-
-          <span>
-            Describe your requirements naturally
-          </span>
-
-          <button
-            onClick={handleRecommend}
-            className="primary-button"
-          >
-            ✦ Get Recommendations
-          </button>
-
+      {recommendations.length === 0 ? (
+        <p>No recommendations available yet.</p>
+      ) : (
+        <div className="products-grid">
+          {recommendations.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+            />
+          ))}
         </div>
-
-      </section>
-
-
-      {submittedQuery && (
-
-        <section className="recommendation-preview">
-
-          <div className="query-display">
-
-            <p>
-              YOUR REQUEST
-            </p>
-
-            <h3>
-              "{submittedQuery}"
-            </h3>
-
-          </div>
-
-
-          <div className="coming-soon">
-
-            <div className="ai-icon">
-              ✦
-            </div>
-
-            <h2>
-              AI recommendations coming next
-            </h2>
-
-            <p>
-              This interface is ready. Next we'll connect
-              it to the Django recommendation API and Gemini.
-            </p>
-
-          </div>
-
-        </section>
-
       )}
-
     </div>
   );
 }
