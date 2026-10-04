@@ -7,14 +7,32 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
-import { fetchRecommendations } from "../services/api";
 
-import "./ShopPages.css";
+import {
+  fetchRecommendationSearch,
+  fetchRecommendations,
+} from "../services/api";
+
+import "./RecommendationSearch.css";
+
 
 function Recommendations() {
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const { user } = useAuth();
+  const {
+    user,
+  } = useAuth();
+
+  const [
+    searchQuery,
+    setSearchQuery,
+  ] = useState("");
+
+  const [
+    searchedQuery,
+    setSearchedQuery,
+  ] = useState("");
 
   const [
     recommendationData,
@@ -24,17 +42,28 @@ function Recommendations() {
     products: [],
   });
 
-  const [loading, setLoading] =
-    useState(true);
+  const [
+    loading,
+    setLoading,
+  ] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [
+    searching,
+    setSearching,
+  ] = useState(false);
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
 
   const loadRecommendations =
     useCallback(async () => {
       try {
         setLoading(true);
         setError("");
+        setSearchedQuery("");
 
         const data =
           await fetchRecommendations();
@@ -56,140 +85,278 @@ function Recommendations() {
         );
 
         setError(
-          "We could not generate recommendations right now."
+          "We could not load recommendations right now."
         );
       } finally {
         setLoading(false);
       }
     }, []);
 
+
   useEffect(() => {
     loadRecommendations();
   }, [loadRecommendations]);
 
+
+  const handleSearch =
+    async (event) => {
+      event.preventDefault();
+
+      const query =
+        searchQuery.trim();
+
+      if (!query) {
+        return;
+      }
+
+      try {
+        setSearching(true);
+        setError("");
+
+        const data =
+          await fetchRecommendationSearch(
+            query
+          );
+
+        setRecommendationData({
+          reason:
+            data?.reason ||
+            "These products match your request.",
+          products:
+            Array.isArray(
+              data?.products
+            )
+              ? data.products
+              : [],
+        });
+
+        setSearchedQuery(
+          query
+        );
+      } catch (requestError) {
+        console.error(
+          requestError
+        );
+
+        setError(
+          "We could not understand that request. Try another search."
+        );
+      } finally {
+        setSearching(false);
+      }
+    };
+
+
+  const handleExampleSearch =
+    (query) => {
+      setSearchQuery(query);
+
+      setTimeout(() => {
+        document
+          .getElementById(
+            "ai-recommendation-search"
+          )
+          ?.focus();
+      }, 0);
+    };
+
+
+  const handleReset =
+    async () => {
+      setSearchQuery("");
+
+      await loadRecommendations();
+    };
+
+
   return (
-    <div className="recommendations-page">
-      <section className="recommendations-hero">
-        <div className="recommendation-hero-glow" />
-        <div className="recommendation-orbit orbit-one" />
-        <div className="recommendation-orbit orbit-two" />
+    <div className="ai-recommendation-page">
 
-        <div className="recommendation-hero-inner">
-          <div className="recommendation-hero-content">
-            <span className="recommendations-label">
-              ✦ AI SHOPPING ASSISTANT
+      <section className="ai-recommendation-hero">
+
+        <div className="ai-hero-background">
+          <span className="ai-glow ai-glow-one" />
+          <span className="ai-glow ai-glow-two" />
+          <span className="ai-grid-pattern" />
+        </div>
+
+        <div className="ai-hero-content">
+
+          
+
+          <p className="ai-welcome">
+            Welcome back,{" "}
+            {user?.username}
+          </p>
+
+          <h1>
+            Tell us what
+            <span>
+              you want to buy.
             </span>
+          </h1>
 
-            <p className="recommendations-greeting">
-              Welcome back,{" "}
-              {user?.username}
-            </p>
+          <p className="ai-hero-description">
+            Describe what you are looking for
+            in normal language and ShopGen AI
+            will find matching products from
+            our catalog.
+          </p>
 
-            <h1>
-              Recommendations
-              <span>
-                with a reason.
+          <form
+            className="ai-search-form"
+            onSubmit={handleSearch}
+          >
+            <div className="ai-search-box">
+
+              <span className="ai-search-icon">
+                ⌕
               </span>
-            </h1>
 
-            <p>
-              ShopGen AI learns from your product
-              views and combines them with catalogue
-              signals to discover products worth
-              exploring next.
-            </p>
-          </div>
+              <input
+                id="ai-recommendation-search"
+                type="text"
+                value={searchQuery}
+                onChange={(event) =>
+                  setSearchQuery(
+                    event.target.value
+                  )
+                }
+                placeholder="I want to buy headphones"
+                autoComplete="off"
+              />
 
-          <div className="ai-orb-main">
-            <div className="ai-orb-core">
-              ✦
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="ai-clear-button"
+                  onClick={() =>
+                    setSearchQuery("")
+                  }
+                >
+                  ×
+                </button>
+              )}
+
+              <button
+                type="submit"
+                className="ai-search-button"
+                disabled={
+                  searching ||
+                  !searchQuery.trim()
+                }
+              >
+                {searching
+                  ? "Searching..."
+                  : "Ask AI"}
+              </button>
+
             </div>
+          </form>
+
+          <div className="ai-example-row">
 
             <span>
-              GEMINI AI
+              Try:
             </span>
+
+            <button
+              type="button"
+              onClick={() =>
+                handleExampleSearch(
+                  "I want to buy headphones"
+                )
+              }
+            >
+              Headphones
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                handleExampleSearch(
+                  "I need running shoes"
+                )
+              }
+            >
+              Running shoes
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                handleExampleSearch(
+                  "I want a backpack"
+                )
+              }
+            >
+              Backpack
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                handleExampleSearch(
+                  "I need a smartwatch"
+                )
+              }
+            >
+              Smartwatch
+            </button>
+
           </div>
+
         </div>
       </section>
 
-      <main className="recommendation-content">
-        <section className="recommendation-reason">
-          <div className="reason-icon">
-            ✦
-          </div>
+
+      <main className="ai-results-container">
+
+        <section className="ai-results-header">
 
           <div>
-            <span className="reason-title">
-              Why these products?
+
+            <span className="ai-section-label">
+              {searchedQuery
+                ? "AI SEARCH RESULTS"
+                : "PERSONALIZED FOR YOU"}
             </span>
+
+            <h2>
+              {searchedQuery
+                ? `Results for "${searchedQuery}"`
+                : "Your recommendations"}
+            </h2>
 
             <p>
               {recommendationData.reason}
             </p>
+
           </div>
+
+          {searchedQuery && (
+            <button
+              type="button"
+              className="ai-reset-button"
+              onClick={handleReset}
+            >
+              Back to recommendations
+            </button>
+          )}
+
         </section>
 
-        <section className="recommendations-section-header">
-          <div>
-            <span className="section-label">
-              CURATED FOR YOU
-            </span>
 
-            <h2>
-              Your next discoveries
-            </h2>
+        {error && (
+          <section className="ai-state-card">
 
-            <p>
-              Personalized using your ShopGen
-              activity.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="refresh-button"
-            onClick={
-              loadRecommendations
-            }
-            disabled={loading}
-          >
-            {loading
-              ? "Thinking..."
-              : "↻ Refresh"}
-          </button>
-        </section>
-
-        {loading && (
-          <div className="recommendation-grid">
-            {Array.from({
-              length: 6,
-            }).map((_, index) => (
-              <div
-                className="recommendation-card skeleton-card"
-                key={index}
-              >
-                <div className="skeleton skeleton-image" />
-
-                <div className="recommendation-card-content">
-                  <div className="skeleton skeleton-line small" />
-                  <div className="skeleton skeleton-line" />
-                  <div className="skeleton skeleton-line medium" />
-                  <div className="skeleton skeleton-button" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && error && (
-          <div className="recommendations-state">
-            <div className="state-icon">
+            <div className="ai-state-icon">
               !
             </div>
 
-            <h2>
-              Recommendation engine unavailable
-            </h2>
+            <h3>
+              Something went wrong
+            </h3>
 
             <p>
               {error}
@@ -197,80 +364,114 @@ function Recommendations() {
 
             <button
               type="button"
-              className="retry-button"
               onClick={
                 loadRecommendations
               }
             >
               Try again
             </button>
-          </div>
+
+          </section>
         )}
 
+
+        {(loading || searching) && (
+          <section className="ai-product-grid">
+
+            {Array.from({
+              length: 6,
+            }).map((_, index) => (
+              <article
+                className="ai-product-card ai-skeleton-card"
+                key={index}
+              >
+                <div className="ai-skeleton-image" />
+
+                <div className="ai-card-content">
+
+                  <div className="ai-skeleton-line small" />
+                  <div className="ai-skeleton-line" />
+                  <div className="ai-skeleton-line medium" />
+                  <div className="ai-skeleton-button" />
+
+                </div>
+              </article>
+            ))}
+
+          </section>
+        )}
+
+
         {!loading &&
+          !searching &&
           !error &&
-          recommendationData.products.length ===
-            0 && (
-            <div className="recommendations-empty">
-              <div className="empty-icon">
+          recommendationData.products.length === 0 && (
+            <section className="ai-empty-card">
+
+              <div className="ai-empty-icon">
                 ✦
               </div>
 
-              <h2>
-                Your recommendations are warming up
-              </h2>
+              <h3>
+                No matching products found
+              </h3>
 
               <p>
-                Browse a few products first.
-                ShopGen AI will use those
-                interactions to personalize your
-                recommendations.
+                Try describing the product
+                in a different way.
               </p>
 
               <button
                 type="button"
-                className="browse-products-button"
                 onClick={() =>
-                  navigate("/products")
+                  setSearchQuery("")
                 }
               >
-                Explore products →
+                Try another search
               </button>
-            </div>
+
+            </section>
           )}
 
+
         {!loading &&
+          !searching &&
           !error &&
-          recommendationData.products.length >
-            0 && (
-            <div className="recommendation-grid">
+          recommendationData.products.length > 0 && (
+            <section className="ai-product-grid">
+
               {recommendationData.products.map(
                 (product, index) => (
                   <article
-                    className="recommendation-card"
+                    className="ai-product-card"
                     key={product.id}
                   >
-                    <div className="recommendation-image-wrapper">
+
+                    <div className="ai-product-image-wrapper">
+
                       <img
                         src={product.image}
                         alt={product.title}
-                        className="recommendation-image"
+                        className="ai-product-image"
                         loading="lazy"
                       />
 
-                      <span className="ai-badge">
+                      <span className="ai-pick-badge">
                         AI PICK {index + 1}
                       </span>
+
                     </div>
 
-                    <div className="recommendation-card-content">
-                      <span className="product-category">
+
+                    <div className="ai-card-content">
+
+                      <span className="ai-product-category">
                         {product.category}
                       </span>
 
                       <button
                         type="button"
-                        className="recommendation-title"
+                        className="ai-product-title"
                         onClick={() =>
                           navigate(
                             `/products/${product.id}`
@@ -280,8 +481,10 @@ function Recommendations() {
                         {product.title}
                       </button>
 
-                      <div className="recommendation-rating">
-                        <span className="stars">
+
+                      <div className="ai-product-rating">
+
+                        <span className="ai-stars">
                           ★★★★★
                         </span>
 
@@ -289,13 +492,21 @@ function Recommendations() {
                           {product.rating}
                         </strong>
 
-                        <span className="rating-count">
+                        <span>
                           ({product.rating_count})
                         </span>
+
                       </div>
 
-                      <div className="recommendation-bottom">
-                        <span className="recommendation-price">
+
+                      <p className="ai-product-description">
+                        {product.description}
+                      </p>
+
+
+                      <div className="ai-product-bottom">
+
+                        <span className="ai-product-price">
                           $
                           {Number(
                             product.price
@@ -304,54 +515,114 @@ function Recommendations() {
 
                         <button
                           type="button"
-                          className="view-product-button"
+                          className="ai-view-button"
                           onClick={() =>
                             navigate(
                               `/products/${product.id}`
                             )
                           }
                         >
-                          Explore ↗
+                          View product
+                          <span>
+                            ↗
+                          </span>
                         </button>
+
                       </div>
+
                     </div>
+
                   </article>
                 )
               )}
-            </div>
+
+            </section>
           )}
 
-        <section className="recommendations-cta">
-          <div>
-            <span className="cta-label">
-              KEEP EXPLORING
-            </span>
 
-            <h2>
-              Your next product view can
-              improve the next recommendation.
-            </h2>
+        <section className="ai-how-it-works">
 
-            <p>
-              Browse the catalog and return to
-              see how your personalized results
-              change.
-            </p>
+          <div className="ai-how-label">
+            HOW IT WORKS
           </div>
 
-          <button
-            type="button"
-            className="cta-button"
-            onClick={() =>
-              navigate("/products")
-            }
-          >
-            Explore catalog →
-          </button>
+          <h2>
+            Shopping does not need
+            to be complicated.
+          </h2>
+
+          <div className="ai-steps">
+
+            <div className="ai-step">
+
+              <div className="ai-step-number">
+                01
+              </div>
+
+              <div>
+                <h3>
+                  Tell us what you need
+                </h3>
+
+                <p>
+                  Type your request naturally.
+                  You do not need to search
+                  using exact product names.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div className="ai-step">
+
+              <div className="ai-step-number">
+                02
+              </div>
+
+              <div>
+                <h3>
+                  ShopGen finds matches
+                </h3>
+
+                <p>
+                  Your request is compared
+                  with products in the ShopGen
+                  catalog.
+                </p>
+              </div>
+
+            </div>
+
+
+            <div className="ai-step">
+
+              <div className="ai-step-number">
+                03
+              </div>
+
+              <div>
+                <h3>
+                  Explore your picks
+                </h3>
+
+                <p>
+                  Open the products that look
+                  right for you and continue
+                  shopping.
+                </p>
+              </div>
+
+            </div>
+
+          </div>
+
         </section>
+
       </main>
     </div>
   );
 }
+
 
 export default Recommendations;

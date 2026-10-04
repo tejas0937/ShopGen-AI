@@ -61,12 +61,7 @@ function Navbar() {
               Products
             </NavLink>
 
-            <a
-              href="/recommendations"
-              onClick={handleAiNavigation}
-            >
-              AI Recommendations
-            </a>
+            
           </div>
 
           <div className="nav-actions">

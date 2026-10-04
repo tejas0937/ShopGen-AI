@@ -10,17 +10,52 @@ from .views import (
     product_detail,
     track_interaction,
     recommendations,
+    recommendation_search,
 )
 
-urlpatterns = [
-    path("csrf/", csrf_token, name="csrf"),
-    path("register/", register, name="register"),
-    path("login/", login_view, name="login"),
-    path("logout/", logout_view, name="logout"),
-    path("me/", current_user, name="current-user"),
 
-    path("products/", product_list, name="product-list"),
-    path("products/<int:product_id>/", product_detail, name="product-detail"),
+urlpatterns = [
+    path(
+        "csrf/",
+        csrf_token,
+        name="csrf"
+    ),
+
+    path(
+        "register/",
+        register,
+        name="register"
+    ),
+
+    path(
+        "login/",
+        login_view,
+        name="login"
+    ),
+
+    path(
+        "logout/",
+        logout_view,
+        name="logout"
+    ),
+
+    path(
+        "me/",
+        current_user,
+        name="current-user"
+    ),
+
+    path(
+        "products/",
+        product_list,
+        name="product-list"
+    ),
+
+    path(
+        "products/<int:product_id>/",
+        product_detail,
+        name="product-detail"
+    ),
 
     path(
         "interactions/",
@@ -29,8 +64,14 @@ urlpatterns = [
     ),
 
     path(
-    "recommendations/",
-    recommendations,
-    name="recommendations"
-),
+        "recommendations/",
+        recommendations,
+        name="recommendations"
+    ),
+
+    path(
+        "recommendations/search/",
+        recommendation_search,
+        name="recommendation-search"
+    ),
 ]

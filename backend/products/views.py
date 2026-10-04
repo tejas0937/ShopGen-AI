@@ -9,6 +9,28 @@ from rest_framework import status
 
 from .models import Product, UserInteraction
 from .gemini_service import generate_recommendation_explanation
+from .recommendation_service import (
+    recommend_products,
+    build_search_reason,
+)
+
+
+# ---------------------------------------------------------
+# HELPERS
+# ---------------------------------------------------------
+
+def product_to_dict(product):
+    return {
+        "id": product.id,
+        "external_id": product.external_id,
+        "title": product.title,
+        "description": product.description,
+        "price": float(product.price),
+        "category": product.category.name,
+        "image": product.image,
+        "rating": product.rating,
+        "rating_count": product.rating_count,
+    }
 
 
 # ---------------------------------------------------------
@@ -157,20 +179,10 @@ def current_user(request):
 def product_list(request):
     products = Product.objects.all().order_by("id")
 
-    data = []
-
-    for product in products:
-        data.append({
-            "id": product.id,
-            "external_id": product.external_id,
-            "title": product.title,
-            "description": product.description,
-            "price": float(product.price),
-            "category": product.category.name,
-            "image": product.image,
-            "rating": product.rating,
-            "rating_count": product.rating_count,
-        })
+    data = [
+        product_to_dict(product)
+        for product in products
+    ]
 
     return Response(data)
 
@@ -179,7 +191,9 @@ def product_list(request):
 @permission_classes([AllowAny])
 def product_detail(request, product_id):
     try:
-        product = Product.objects.get(id=product_id)
+        product = Product.objects.get(
+            id=product_id
+        )
 
     except Product.DoesNotExist:
         return Response(
@@ -189,17 +203,9 @@ def product_detail(request, product_id):
             status=status.HTTP_404_NOT_FOUND
         )
 
-    return Response({
-        "id": product.id,
-        "external_id": product.external_id,
-        "title": product.title,
-        "description": product.description,
-        "price": float(product.price),
-        "category": product.category.name,
-        "image": product.image,
-        "rating": product.rating,
-        "rating_count": product.rating_count,
-    })
+    return Response(
+        product_to_dict(product)
+    )
 
 
 # ---------------------------------------------------------
@@ -215,7 +221,9 @@ def track_interaction(request):
     if not product_id or not interaction_type:
         return Response(
             {
-                "error": "product_id and interaction_type are required."
+                "error": (
+                    "product_id and interaction_type are required."
+                )
             },
             status=status.HTTP_400_BAD_REQUEST
         )
@@ -255,7 +263,9 @@ def track_interaction(request):
     )
 
     return Response({
-        "message": "Interaction recorded successfully.",
+        "message": (
+            "Interaction recorded successfully."
+        ),
         "user": request.user.username,
         "product": product.title,
         "interaction_type": interaction_type
@@ -271,7 +281,6 @@ def track_interaction(request):
 def recommendations(request):
     user = request.user
 
-    # Get products viewed by the logged in user
     viewed_product_ids = (
         UserInteraction.objects
         .filter(
@@ -290,10 +299,6 @@ def recommendations(request):
         id__in=viewed_product_ids
     )
 
-    # -----------------------------------------------------
-    # No viewing history
-    # -----------------------------------------------------
-
     if not viewed_products.exists():
 
         recommended_products = (
@@ -311,13 +316,8 @@ def recommendations(request):
             "your recommendations."
         )
 
-    # -----------------------------------------------------
-    # User has viewing history
-    # -----------------------------------------------------
-
     else:
 
-        # Most recently viewed product
         latest_interaction = (
             UserInteraction.objects
             .filter(
@@ -337,7 +337,6 @@ def recommendations(request):
 
         user_product = latest_interaction.product
 
-        # Categories the user has shown interest in
         categories = (
             viewed_products
             .values_list(
@@ -347,7 +346,6 @@ def recommendations(request):
             .distinct()
         )
 
-        # Find products from those categories
         recommended_products = (
             Product.objects
             .filter(
@@ -362,20 +360,12 @@ def recommendations(request):
             )[:6]
         )
 
-        # -------------------------------------------------
-        # Related products found
-        # -------------------------------------------------
-
         if recommended_products.exists():
 
             reason = generate_recommendation_explanation(
                 user_product,
                 recommended_products
             )
-
-        # -------------------------------------------------
-        # No related products found
-        # -------------------------------------------------
 
         else:
 
@@ -397,28 +387,63 @@ def recommendations(request):
                 "recent activity."
             )
 
-    # -----------------------------------------------------
-    # Format response
-    # -----------------------------------------------------
-
-    data = []
-
-    for product in recommended_products:
-        data.append({
-            "id": product.id,
-            "external_id": product.external_id,
-            "title": product.title,
-            "description": product.description,
-            "price": float(product.price),
-            "category": product.category.name,
-            "image": product.image,
-            "rating": product.rating,
-            "rating_count": product.rating_count,
-        })
+    data = [
+        product_to_dict(product)
+        for product in recommended_products
+    ]
 
     return Response({
         "authenticated": True,
         "username": user.username,
+        "reason": reason,
+        "products": data
+    })
+
+
+# ---------------------------------------------------------
+# NATURAL LANGUAGE PRODUCT SEARCH
+# ---------------------------------------------------------
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def recommendation_search(request):
+    query = request.GET.get(
+        "q",
+        ""
+    ).strip()
+
+    if not query:
+        return Response(
+            {
+                "error": "Search query is required."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    products = list(
+        Product.objects
+        .select_related("category")
+        .all()
+    )
+
+    recommended_products = recommend_products(
+        query=query,
+        products=products,
+        limit=6
+    )
+
+    reason = build_search_reason(
+        query,
+        recommended_products
+    )
+
+    data = [
+        product_to_dict(product)
+        for product in recommended_products
+    ]
+
+    return Response({
+        "query": query,
         "reason": reason,
         "products": data
     })
