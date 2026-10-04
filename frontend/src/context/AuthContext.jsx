@@ -1,83 +1,99 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-import { fetchCurrentUser, loginUser, logoutUser, registerUser } from "../services/api";
+import {
+  fetchCurrentUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+} from "../services/api";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    try {
-      const storedUser = localStorage.getItem("shopgen-user");
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
 
-  const syncUser = async () => {
-  try {
-    const response = await fetchCurrentUser();
-
-    // /me/ returns the user object directly.
-    setUser(response);
-
-    localStorage.setItem(
-      "shopgen-user",
-      JSON.stringify(response)
-    );
-  } catch {
-    setUser(null);
-    localStorage.removeItem("shopgen-user");
-  } finally {
-    setIsLoading(false);
-  }
-};
   useEffect(() => {
+    async function syncUser() {
+      try {
+        const response = await fetchCurrentUser();
+
+        const nextUser = response?.authenticated
+          ? response.user
+          : null;
+
+        setUser(nextUser);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
     syncUser();
   }, []);
 
-  const handleLogin = async (formData) => {
+  const login = async (formData) => {
     const response = await loginUser(formData);
+
     const nextUser = response?.user || null;
+
     setUser(nextUser);
-    if (nextUser) {
-      localStorage.setItem("shopgen-user", JSON.stringify(nextUser));
-    } else {
-      localStorage.removeItem("shopgen-user");
-    }
+    setLoginPromptOpen(false);
+
     return response;
   };
 
-  const handleRegister = async (formData) => {
+  const register = async (formData) => {
     const response = await registerUser(formData);
+
     const nextUser = response?.user || null;
+
     setUser(nextUser);
-    if (nextUser) {
-      localStorage.setItem("shopgen-user", JSON.stringify(nextUser));
-    } else {
-      localStorage.removeItem("shopgen-user");
-    }
+    setLoginPromptOpen(false);
+
     return response;
   };
 
-  const handleLogout = async () => {
+  const logout = async () => {
     try {
       await logoutUser();
     } catch {
-      // Ignore server logout errors and clear local state anyway.
+      // Session may already be expired on the backend.
     }
 
     setUser(null);
-    localStorage.removeItem("shopgen-user");
+    setLoginPromptOpen(false);
+  };
+
+  const requestLoginPrompt = () => {
+    setLoginPromptOpen(true);
+  };
+
+  const closeLoginPrompt = () => {
+    setLoginPromptOpen(false);
   };
 
   const value = useMemo(
-    () => ({ user, isLoading, login: handleLogin, register: handleRegister, logout: handleLogout }),
-    [user, isLoading]
+    () => ({
+      user,
+      isLoading,
+      login,
+      register,
+      logout,
+      loginPromptOpen,
+      requestLoginPrompt,
+      closeLoginPrompt,
+    }),
+    [user, isLoading, loginPromptOpen]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

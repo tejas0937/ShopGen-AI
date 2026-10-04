@@ -1,14 +1,39 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
 import { fetchProducts } from "../services/api";
+
 import "./ShopPages.css";
 
 function Products() {
+  const navigate = useNavigate();
+
+  const {
+    user,
+    requestLoginPrompt,
+  } = useAuth();
+
   const [products, setProducts] = useState([]);
+
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
+
+  const [sortBy, setSortBy] =
+    useState("featured");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   useEffect(() => {
     async function loadProducts() {
@@ -17,10 +42,18 @@ function Products() {
         setError("");
 
         const data = await fetchProducts();
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load products. Please try again.");
+
+        setProducts(
+          Array.isArray(data)
+            ? data
+            : []
+        );
+      } catch (requestError) {
+        console.error(requestError);
+
+        setError(
+          "Unable to load products right now."
+        );
       } finally {
         setLoading(false);
       }
@@ -30,243 +63,575 @@ function Products() {
   }, []);
 
   const categories = useMemo(() => {
-    const uniqueCategories = [
-      ...new Set(products.map((product) => product.category)),
+    const categoryValues = [
+      ...new Set(
+        products
+          .map(
+            (product) =>
+              product.category
+          )
+          .filter(Boolean)
+      ),
     ];
 
-    return ["All", ...uniqueCategories];
+    return [
+      "All",
+      ...categoryValues,
+    ];
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch =
-        product.title
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        product.description
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
+    const normalizedSearch =
+      search.trim().toLowerCase();
 
-      const matchesCategory =
-        selectedCategory === "All" ||
-        product.category === selectedCategory;
+    const filtered =
+      products.filter((product) => {
+        const searchText = [
+          product.title,
+          product.description,
+          product.category,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
 
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, search, selectedCategory]);
+        const matchesSearch =
+          !normalizedSearch ||
+          searchText.includes(
+            normalizedSearch
+          );
+
+        const matchesCategory =
+          selectedCategory === "All" ||
+          product.category ===
+            selectedCategory;
+
+        return (
+          matchesSearch &&
+          matchesCategory
+        );
+      });
+
+    return [...filtered].sort(
+      (a, b) => {
+        if (sortBy === "price-low") {
+          return (
+            Number(a.price) -
+            Number(b.price)
+          );
+        }
+
+        if (sortBy === "price-high") {
+          return (
+            Number(b.price) -
+            Number(a.price)
+          );
+        }
+
+        if (sortBy === "rating") {
+          return (
+            Number(b.rating) -
+            Number(a.rating)
+          );
+        }
+
+        return (
+          Number(b.rating_count) -
+          Number(a.rating_count)
+        );
+      }
+    );
+  }, [
+    products,
+    search,
+    selectedCategory,
+    sortBy,
+  ]);
+
+  const handleAiRecommendations = () => {
+    if (!user) {
+      requestLoginPrompt();
+      return;
+    }
+
+    navigate("/recommendations");
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setSelectedCategory("All");
+    setSortBy("featured");
+  };
 
   return (
     <div className="shop-page">
-      {/* Hero */}
+      {/* HERO */}
       <section className="shop-hero">
+        <div className="shop-hero-grid" />
+
+        <div className="shop-floating-shape shop-floating-shape-one" />
+        <div className="shop-floating-shape shop-floating-shape-two" />
+
         <div className="shop-hero-content">
-          <span className="hero-badge">SHOPGEN AI</span>
+          <span className="hero-badge">
+            SHOPGEN MARKETPLACE
+          </span>
 
           <h1>
-            Discover products
-            <span> you'll love.</span>
+            Explore products
+            <span>
+              without the noise.
+            </span>
           </h1>
 
           <p>
-            Explore our collection and discover products selected
-            for your interests.
+            Browse the ShopGen catalogue,
+            discover products you like and
+            build the signals that power your
+            AI recommendations.
           </p>
+
+          <div className="shop-hero-actions">
+            <button
+              type="button"
+              className="hero-shop-button"
+              onClick={() =>
+                document
+                  .getElementById(
+                    "catalog"
+                  )
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                  })
+              }
+            >
+              Start browsing ↓
+            </button>
+
+            <button
+              type="button"
+              className="hero-ai-button"
+              onClick={
+                handleAiRecommendations
+              }
+            >
+              ✦ Ask AI
+            </button>
+          </div>
+        </div>
+
+        <div className="shop-hero-stat">
+          <strong>
+            {products.length || "—"}
+          </strong>
+
+          <span>
+            products available
+          </span>
         </div>
       </section>
 
-      {/* Main content */}
-      <main className="shop-content">
+      {/* CATALOG */}
+      <main
+        className="shop-content"
+        id="catalog"
+      >
+        <section className="catalog-panel">
+          <div className="catalog-panel-header">
+            <div>
+              <span className="section-label">
+                PRODUCT CATALOGUE
+              </span>
 
-        {/* Toolbar */}
-        <div className="shop-toolbar">
+              <h2>
+                Find something
+                <span> interesting.</span>
+              </h2>
+            </div>
 
-          <div className="search-wrapper">
-            <span className="search-icon">⌕</span>
+            <div className="catalog-count">
+              <strong>
+                {filteredProducts.length}
+              </strong>
 
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-
-            {search && (
-              <button
-                className="clear-search"
-                onClick={() => setSearch("")}
-              >
-                ×
-              </button>
-            )}
+              <span>
+                results
+              </span>
+            </div>
           </div>
 
-          <div className="category-filter">
-            <label htmlFor="category">
-              Category
+          {/* SEARCH + SORT */}
+          <div className="shop-toolbar">
+            <label className="search-wrapper">
+              <span
+                className="search-icon"
+                aria-hidden="true"
+              >
+                ⌕
+              </span>
+
+              <input
+                type="search"
+                placeholder="Search products, categories or descriptions..."
+                value={search}
+                onChange={(event) =>
+                  setSearch(
+                    event.target.value
+                  )
+                }
+                aria-label="Search products"
+              />
+
+              {search && (
+                <button
+                  type="button"
+                  className="clear-search"
+                  onClick={() =>
+                    setSearch("")
+                  }
+                  aria-label="Clear search"
+                >
+                  ×
+                </button>
+              )}
             </label>
 
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={(event) =>
-                setSelectedCategory(event.target.value)
-              }
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+            <label className="category-filter">
+              <span>
+                Sort by
+              </span>
 
-        {/* Results header */}
+              <select
+                value={sortBy}
+                onChange={(event) =>
+                  setSortBy(
+                    event.target.value
+                  )
+                }
+              >
+                <option value="featured">
+                  Featured
+                </option>
+
+                <option value="rating">
+                  Top rated
+                </option>
+
+                <option value="price-low">
+                  Price: low to high
+                </option>
+
+                <option value="price-high">
+                  Price: high to low
+                </option>
+              </select>
+            </label>
+          </div>
+
+          {/* CATEGORY FILTER */}
+          <div className="category-strip">
+            {categories.map(
+              (category) => (
+                <button
+                  key={category}
+                  type="button"
+                  className={
+                    selectedCategory ===
+                    category
+                      ? "category-chip active"
+                      : "category-chip"
+                  }
+                  onClick={() =>
+                    setSelectedCategory(
+                      category
+                    )
+                  }
+                >
+                  {category}
+                </button>
+              )
+            )}
+          </div>
+        </section>
+
+        {/* RESULTS HEADER */}
         {!loading && !error && (
           <div className="results-header">
             <div>
-              <h2>Explore products</h2>
+              <span className="section-label">
+                DISCOVER
+              </span>
+
+              <h2>
+                Your product universe
+              </h2>
 
               <p>
-                {filteredProducts.length}{" "}
-                {filteredProducts.length === 1
-                  ? "product"
-                  : "products"}{" "}
-                available
+                Showing{" "}
+                <strong>
+                  {
+                    filteredProducts.length
+                  }
+                </strong>{" "}
+                of{" "}
+                <strong>
+                  {products.length}
+                </strong>{" "}
+                products
               </p>
             </div>
 
-            <Link
-              to="/recommendations"
+            <button
+              type="button"
               className="ai-link"
+              onClick={
+                handleAiRecommendations
+              }
             >
-              ✨ Get AI Recommendations
-            </Link>
+              <span>✦</span>
+              Personalize with AI
+              <span>→</span>
+            </button>
           </div>
         )}
 
-        {/* Loading */}
+        {/* LOADING */}
         {loading && (
           <div className="products-grid">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div className="product-card skeleton-card" key={index}>
-                <div className="skeleton skeleton-image"></div>
+            {Array.from({
+              length: 8,
+            }).map((_, index) => (
+              <div
+                className="product-card skeleton-card"
+                key={index}
+              >
+                <div className="skeleton skeleton-image" />
 
-                <div className="skeleton skeleton-small"></div>
+                <div className="skeleton skeleton-small" />
 
-                <div className="skeleton skeleton-title"></div>
+                <div className="skeleton skeleton-title" />
 
-                <div className="skeleton skeleton-text"></div>
+                <div className="skeleton skeleton-text" />
 
-                <div className="skeleton skeleton-price"></div>
+                <div className="skeleton skeleton-price" />
               </div>
             ))}
           </div>
         )}
 
-        {/* Error */}
+        {/* ERROR */}
         {!loading && error && (
           <div className="state-card error-state">
-            <div className="state-icon">!</div>
+            <div className="state-icon">
+              !
+            </div>
 
-            <h3>Something went wrong</h3>
+            <h3>
+              We hit a small bump
+            </h3>
 
-            <p>{error}</p>
+            <p>
+              {error}
+            </p>
 
             <button
-              onClick={() => window.location.reload()}
+              type="button"
               className="primary-button"
+              onClick={() =>
+                window.location.reload()
+              }
             >
               Try again
             </button>
           </div>
         )}
 
-        {/* Empty search */}
+        {/* EMPTY */}
         {!loading &&
           !error &&
           filteredProducts.length === 0 && (
             <div className="state-card">
-              <div className="state-icon">⌕</div>
+              <div className="state-icon">
+                ⌕
+              </div>
 
-              <h3>No products found</h3>
+              <h3>
+                No products found
+              </h3>
 
               <p>
-                Try a different search term or category.
+                Try a different search
+                or category.
               </p>
 
               <button
+                type="button"
                 className="secondary-button"
-                onClick={() => {
-                  setSearch("");
-                  setSelectedCategory("All");
-                }}
+                onClick={clearFilters}
               >
-                Clear filters
+                Reset filters
               </button>
             </div>
           )}
 
-        {/* Products */}
+        {/* PRODUCTS */}
         {!loading &&
           !error &&
-          filteredProducts.length > 0 && (
+          filteredProducts.length >
+            0 && (
             <div className="products-grid">
-              {filteredProducts.map((product) => (
-                <Link
-                  to={`/products/${product.id}`}
-                  className="product-card"
-                  key={product.id}
-                >
-                  <div className="product-image-wrapper">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="product-image"
-                      loading="lazy"
-                    />
+              {filteredProducts.map(
+                (
+                  product,
+                  index
+                ) => (
+                  <article
+                    className="product-card"
+                    key={product.id}
+                    style={{
+                      "--card-index":
+                        index,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      className="product-card-click"
+                      onClick={() =>
+                        navigate(
+                          `/products/${product.id}`
+                        )
+                      }
+                      aria-label={`View ${product.title}`}
+                    >
+                      {/* IMAGE */}
+                      <div className="product-image-wrapper">
+                        <img
+                          src={
+                            product.image
+                          }
+                          alt={
+                            product.title
+                          }
+                          className="product-image"
+                          loading="lazy"
+                        />
 
-                    <span className="product-category">
-                      {product.category}
-                    </span>
-                  </div>
+                        <span className="product-category">
+                          {
+                            product.category
+                          }
+                        </span>
 
-                  <div className="product-card-body">
+                        {index <
+                          3 && (
+                          <span className="product-ribbon">
+                            Popular
+                          </span>
+                        )}
 
-                    <div className="product-rating">
-                      <span>★</span>
+                        <span className="product-view-icon">
+                          ↗
+                        </span>
+                      </div>
 
-                      <strong>
-                        {product.rating}
-                      </strong>
+                      {/* BODY */}
+                      <div className="product-card-body">
+                        <div className="product-rating">
+                          <span>
+                            ★
+                          </span>
 
-                      <small>
-                        ({product.rating_count})
-                      </small>
-                    </div>
+                          <strong>
+                            {
+                              product.rating
+                            }
+                          </strong>
 
-                    <h3 className="product-title">
-                      {product.title}
-                    </h3>
+                          <small>
+                            (
+                            {
+                              product.rating_count
+                            }
+                            )
+                          </small>
+                        </div>
 
-                    <p className="product-description">
-                      {product.description}
-                    </p>
+                        <h3 className="product-title">
+                          {
+                            product.title
+                          }
+                        </h3>
 
-                    <div className="product-card-footer">
-                      <span className="product-price">
-                        ${Number(product.price).toFixed(2)}
-                      </span>
+                        <p className="product-description">
+                          {
+                            product.description
+                          }
+                        </p>
 
-                      <span className="view-product">
-                        View →
-                      </span>
-                    </div>
+                        <div className="product-card-footer">
+                          <span className="product-price">
+                            $
+                            {Number(
+                              product.price
+                            ).toFixed(
+                              2
+                            )}
+                          </span>
 
-                  </div>
-                </Link>
-              ))}
+                          <span className="view-product">
+                            View details
+                            <span>
+                              →
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  </article>
+                )
+              )}
             </div>
+          )}
+
+        {/* BOTTOM AI CTA */}
+        {!loading &&
+          !error &&
+          products.length > 0 && (
+            <section className="products-ai-banner">
+              <div className="products-ai-decoration" />
+
+              <div className="products-ai-icon">
+                ✦
+              </div>
+
+              <div className="products-ai-content">
+                <span>
+                  SHOPGEN AI
+                </span>
+
+                <h2>
+                  Not sure what to
+                  explore next?
+                </h2>
+
+                <p>
+                  Let AI use your browsing
+                  activity to find relevant
+                  products for you.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={
+                  handleAiRecommendations
+                }
+                className="products-ai-button"
+              >
+                Get recommendations
+                <span>→</span>
+              </button>
+            </section>
           )}
       </main>
     </div>

@@ -1,276 +1,325 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { fetchProducts } from "../services/api";
-import "./ShopPages.css";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 
-function Products() {
-  const [products, setProducts] = useState([]);
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
+import { fetchRecommendations } from "../services/api";
+
+import "./ShopPages.css";
+import "../styles/recommendations.css";
+
+function Recommendations() {
+  const navigate = useNavigate();
+
+  const { user } = useAuth();
+
+  const [recommendationData, setRecommendationData] =
+    useState({
+      reason: "",
+      products: [],
+    });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    async function loadProducts() {
+  const loadRecommendations = useCallback(
+    async () => {
       try {
         setLoading(true);
         setError("");
 
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to load products. Please try again.");
+        const data = await fetchRecommendations();
+
+        setRecommendationData({
+          reason:
+            data?.reason ||
+            "These products were selected for you.",
+          products: Array.isArray(data?.products)
+            ? data.products
+            : [],
+        });
+      } catch (requestError) {
+        console.error(requestError);
+
+        setError(
+          "We could not generate recommendations right now."
+        );
       } finally {
         setLoading(false);
       }
-    }
+    },
+    []
+  );
 
-    loadProducts();
-  }, []);
-
-  const categories = useMemo(() => {
-    const uniqueCategories = [
-      ...new Set(products.map((product) => product.category)),
-    ];
-
-    return ["All", ...uniqueCategories];
-  }, [products]);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSearch =
-        product.title
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
-        product.description
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
-
-      const matchesCategory =
-        selectedCategory === "All" ||
-        product.category === selectedCategory;
-
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, search, selectedCategory]);
+  useEffect(() => {
+    loadRecommendations();
+  }, [loadRecommendations]);
 
   return (
-    <div className="shop-page">
-      {/* Hero */}
-      <section className="shop-hero">
-        <div className="shop-hero-content">
-          <span className="hero-badge">SHOPGEN AI</span>
+    <div className="recommendations-page">
+      <section className="recommendations-hero">
+        <div className="recommendation-hero-glow" />
+        <div className="recommendation-orbit orbit-one" />
+        <div className="recommendation-orbit orbit-two" />
+
+        <div className="hero-content">
+          <span className="recommendations-label">
+            ✦ AI SHOPPING ASSISTANT
+          </span>
+
+          <p className="recommendations-greeting">
+            Welcome back, {user?.username}
+          </p>
 
           <h1>
-            Discover products
-            <span> you'll love.</span>
+            Recommendations
+            <span>with a reason.</span>
           </h1>
 
           <p>
-            Explore our collection and discover products selected
-            for your interests.
+            ShopGen AI learns from your product views
+            and combines them with catalog signals to
+            discover products worth exploring next.
           </p>
+        </div>
+
+        <div className="ai-orb-main">
+          <div className="ai-orb-core">
+            ✦
+          </div>
+
+          <span>Gemini AI</span>
         </div>
       </section>
 
-      {/* Main content */}
-      <main className="shop-content">
+      <main className="recommendation-content">
+        <section className="recommendation-reason">
+          <div className="reason-icon">
+            ✦
+          </div>
 
-        {/* Toolbar */}
-        <div className="shop-toolbar">
+          <div>
+            <span className="reason-title">
+              Why these products?
+            </span>
 
-          <div className="search-wrapper">
-            <span className="search-icon">⌕</span>
+            <p>
+              {recommendationData.reason}
+            </p>
+          </div>
+        </section>
 
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
+        <section className="recommendations-section-header">
+          <div>
+            <span className="section-label">
+              CURATED FOR YOU
+            </span>
 
-            {search && (
-              <button
-                className="clear-search"
-                onClick={() => setSearch("")}
-              >
-                ×
-              </button>
+            <h2>
+              Your next discoveries
+            </h2>
+
+            <p>
+              Personalized using your ShopGen activity.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="refresh-button"
+            onClick={loadRecommendations}
+            disabled={loading}
+          >
+            {loading
+              ? "Thinking..."
+              : "↻ Refresh"}
+          </button>
+        </section>
+
+        {loading && (
+          <div className="recommendation-grid">
+            {Array.from({ length: 6 }).map(
+              (_, index) => (
+                <div
+                  className="recommendation-card skeleton-card"
+                  key={index}
+                >
+                  <div className="skeleton skeleton-image" />
+
+                  <div className="recommendation-card-content">
+                    <div className="skeleton skeleton-line small" />
+                    <div className="skeleton skeleton-line" />
+                    <div className="skeleton skeleton-line medium" />
+                    <div className="skeleton skeleton-button" />
+                  </div>
+                </div>
+              )
             )}
           </div>
+        )}
 
-          <div className="category-filter">
-            <label htmlFor="category">
-              Category
-            </label>
-
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={(event) =>
-                setSelectedCategory(event.target.value)
-              }
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Results header */}
-        {!loading && !error && (
-          <div className="results-header">
-            <div>
-              <h2>Explore products</h2>
-
-              <p>
-                {filteredProducts.length}{" "}
-                {filteredProducts.length === 1
-                  ? "product"
-                  : "products"}{" "}
-                available
-              </p>
+        {!loading && error && (
+          <div className="recommendations-state">
+            <div className="state-icon">
+              !
             </div>
 
-            <Link
-              to="/recommendations"
-              className="ai-link"
-            >
-              ✨ Get AI Recommendations
-            </Link>
-          </div>
-        )}
+            <h2>
+              Recommendation engine unavailable
+            </h2>
 
-        {/* Loading */}
-        {loading && (
-          <div className="products-grid">
-            {Array.from({ length: 8 }).map((_, index) => (
-              <div className="product-card skeleton-card" key={index}>
-                <div className="skeleton skeleton-image"></div>
-
-                <div className="skeleton skeleton-small"></div>
-
-                <div className="skeleton skeleton-title"></div>
-
-                <div className="skeleton skeleton-text"></div>
-
-                <div className="skeleton skeleton-price"></div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Error */}
-        {!loading && error && (
-          <div className="state-card error-state">
-            <div className="state-icon">!</div>
-
-            <h3>Something went wrong</h3>
-
-            <p>{error}</p>
+            <p>
+              {error}
+            </p>
 
             <button
-              onClick={() => window.location.reload()}
-              className="primary-button"
+              type="button"
+              className="retry-button"
+              onClick={loadRecommendations}
             >
               Try again
             </button>
           </div>
         )}
 
-        {/* Empty search */}
         {!loading &&
           !error &&
-          filteredProducts.length === 0 && (
-            <div className="state-card">
-              <div className="state-icon">⌕</div>
+          recommendationData.products.length === 0 && (
+            <div className="recommendations-empty">
+              <div className="empty-icon">
+                ✦
+              </div>
 
-              <h3>No products found</h3>
+              <h2>
+                Your recommendations are warming up
+              </h2>
 
               <p>
-                Try a different search term or category.
+                Browse a few products first.
+                ShopGen AI will use those interactions
+                to personalize your recommendations.
               </p>
 
               <button
-                className="secondary-button"
-                onClick={() => {
-                  setSearch("");
-                  setSelectedCategory("All");
-                }}
+                type="button"
+                className="browse-products-button"
+                onClick={() => navigate("/products")}
               >
-                Clear filters
+                Explore products →
               </button>
             </div>
           )}
 
-        {/* Products */}
         {!loading &&
           !error &&
-          filteredProducts.length > 0 && (
-            <div className="products-grid">
-              {filteredProducts.map((product) => (
-                <Link
-                  to={`/products/${product.id}`}
-                  className="product-card"
-                  key={product.id}
-                >
-                  <div className="product-image-wrapper">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="product-image"
-                      loading="lazy"
-                    />
+          recommendationData.products.length > 0 && (
+            <div className="recommendation-grid">
+              {recommendationData.products.map(
+                (product, index) => (
+                  <article
+                    className="recommendation-card"
+                    key={product.id}
+                  >
+                    <div className="recommendation-image-wrapper">
+                      <img
+                        src={product.image}
+                        alt={product.title}
+                        className="recommendation-image"
+                        loading="lazy"
+                      />
 
-                    <span className="product-category">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  <div className="product-card-body">
-
-                    <div className="product-rating">
-                      <span>★</span>
-
-                      <strong>
-                        {product.rating}
-                      </strong>
-
-                      <small>
-                        ({product.rating_count})
-                      </small>
-                    </div>
-
-                    <h3 className="product-title">
-                      {product.title}
-                    </h3>
-
-                    <p className="product-description">
-                      {product.description}
-                    </p>
-
-                    <div className="product-card-footer">
-                      <span className="product-price">
-                        ${Number(product.price).toFixed(2)}
-                      </span>
-
-                      <span className="view-product">
-                        View →
+                      <span className="ai-badge">
+                        AI PICK {index + 1}
                       </span>
                     </div>
 
-                  </div>
-                </Link>
-              ))}
+                    <div className="recommendation-card-content">
+                      <span className="product-category">
+                        {product.category}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="recommendation-title"
+                        onClick={() =>
+                          navigate(
+                            `/products/${product.id}`
+                          )
+                        }
+                      >
+                        {product.title}
+                      </button>
+
+                      <div className="recommendation-rating">
+                        <span className="stars">
+                          ★★★★★
+                        </span>
+
+                        <strong>
+                          {product.rating}
+                        </strong>
+
+                        <span className="rating-count">
+                          ({product.rating_count})
+                        </span>
+                      </div>
+
+                      <div className="recommendation-bottom">
+                        <span className="recommendation-price">
+                          ${Number(product.price).toFixed(2)}
+                        </span>
+
+                        <button
+                          type="button"
+                          className="view-product-button"
+                          onClick={() =>
+                            navigate(
+                              `/products/${product.id}`
+                            )
+                          }
+                        >
+                          Explore ↗
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                )
+              )}
             </div>
           )}
+
+        <section className="recommendations-cta">
+          <div>
+            <span className="cta-label">
+              KEEP EXPLORING
+            </span>
+
+            <h2>
+              Your next product view can improve
+              the next recommendation.
+            </h2>
+
+            <p>
+              Browse the catalog and return to see
+              how your personalized results change.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="cta-button"
+            onClick={() => navigate("/products")}
+          >
+            Explore catalog →
+          </button>
+        </section>
       </main>
     </div>
   );
 }
 
-export default Products;
+export default Recommendations;
