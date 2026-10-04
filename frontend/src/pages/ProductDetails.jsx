@@ -19,7 +19,6 @@ import "./ShopPages.css";
 
 function ProductDetails() {
   const navigate = useNavigate();
-
   const { id } = useParams();
 
   const {
@@ -47,11 +46,6 @@ function ProductDetails() {
 
         setProduct(data);
 
-        /*
-         * Only authenticated users
-         * should create interaction
-         * records.
-         */
         if (user) {
           try {
             await trackInteraction(
@@ -160,7 +154,6 @@ function ProductDetails() {
 
   return (
     <div className="product-details-page">
-      {/* BACK NAVIGATION */}
       <div className="product-details-topbar">
         <button
           type="button"
@@ -180,9 +173,7 @@ function ProductDetails() {
         </span>
       </div>
 
-      {/* MAIN PRODUCT */}
       <main className="product-details-container">
-        {/* PRODUCT IMAGE */}
         <section className="product-details-visual">
           <div className="detail-background-circle" />
           <div className="detail-background-circle-two" />
@@ -211,7 +202,6 @@ function ProductDetails() {
           </div>
         </section>
 
-        {/* PRODUCT INFORMATION */}
         <section className="product-details-info">
           <div className="detail-category-row">
             <span className="detail-category">
@@ -266,7 +256,6 @@ function ProductDetails() {
             </p>
           </div>
 
-          {/* AI RECOMMENDATION CARD */}
           <div className="detail-ai-card">
             <div className="detail-ai-icon">
               ✦
@@ -282,9 +271,8 @@ function ProductDetails() {
               </h3>
 
               <p>
-                Discover similar products
-                selected using your shopping
-                activity.
+                Discover similar products selected
+                using your shopping activity.
               </p>
             </div>
 
@@ -300,7 +288,6 @@ function ProductDetails() {
             </button>
           </div>
 
-          {/* ACTIONS */}
           <div className="detail-actions">
             <button
               type="button"
@@ -329,16 +316,15 @@ function ProductDetails() {
               <span>ⓘ</span>
 
               <p>
-                Login to track your product
-                activity and unlock
-                personalized recommendations.
+                Login to track your product activity
+                and unlock personalized
+                recommendations.
               </p>
             </div>
           )}
         </section>
       </main>
 
-      {/* BOTTOM TRUST STRIP */}
       <section className="detail-benefits">
         <div>
           <span className="benefit-icon">
@@ -383,8 +369,7 @@ function ProductDetails() {
             </strong>
 
             <small>
-              Recommendations improve
-              with activity
+              Recommendations improve with activity
             </small>
           </div>
         </div>

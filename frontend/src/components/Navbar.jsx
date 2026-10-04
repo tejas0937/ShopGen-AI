@@ -1,4 +1,8 @@
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import {
+  Link,
+  NavLink,
+  useNavigate,
+} from "react-router-dom";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -29,96 +33,98 @@ function Navbar() {
   };
 
   return (
-    <nav className="navbar">
-      <div className="navbar-container">
-        <Link
-          to="/"
-          className="logo"
-        >
-          <span className="logo-mark">
-            S
-          </span>
-
-          <span>
-            ShopGen <strong>AI</strong>
-          </span>
-        </Link>
-
-        <div className="nav-links">
-          <NavLink
+    <header className="site-header">
+      <nav
+        className="navbar"
+        aria-label="Main navigation"
+      >
+        <div className="navbar-container">
+          <Link
             to="/"
-            end
+            className="brand"
           >
-            Home
-          </NavLink>
+            <span className="brand-mark">
+              S
+            </span>
 
-          <NavLink to="/products">
-            Products
-          </NavLink>
+            <span className="brand-name">
+              ShopGen <strong>AI</strong>
+            </span>
+          </Link>
 
-          <NavLink
-            to="/recommendations"
-            onClick={handleAiNavigation}
-          >
-            AI Recommendations
-          </NavLink>
+          <div className="nav-links">
+            <NavLink to="/" end>
+              Home
+            </NavLink>
+
+            <NavLink to="/products">
+              Products
+            </NavLink>
+
+            <a
+              href="/recommendations"
+              onClick={handleAiNavigation}
+            >
+              AI Recommendations
+            </a>
+          </div>
+
+          <div className="nav-actions">
+            <button
+              type="button"
+              className="nav-ai-button"
+              onClick={handleAiNavigation}
+            >
+              <span>✦</span>
+              Ask AI
+            </button>
+
+            {isLoading ? (
+              <span
+                className="nav-loading"
+                aria-label="Checking login"
+              />
+            ) : user ? (
+              <div className="nav-user">
+                <span className="user-avatar">
+                  {user.username
+                    ?.slice(0, 1)
+                    .toUpperCase()}
+                </span>
+
+                <span className="user-name">
+                  {user.username}
+                </span>
+
+                <button
+                  type="button"
+                  className="nav-logout"
+                  onClick={handleLogout}
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="nav-auth">
+                <Link
+                  to="/login"
+                  className="nav-login"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  to="/register"
+                  className="nav-register"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-
-        <div className="nav-actions">
-          <a
-            href="/recommendations"
-            className="nav-ai-button"
-            onClick={handleAiNavigation}
-          >
-            <span>✦</span>
-            Ask AI
-          </a>
-
-          {isLoading ? (
-            <span
-              className="nav-loading"
-              aria-label="Checking login"
-            />
-          ) : user ? (
-            <div className="nav-user">
-              <span className="user-avatar">
-                {user.username
-                  ?.slice(0, 1)
-                  .toUpperCase()}
-              </span>
-
-              <span className="user-badge">
-                Hi, {user.username}
-              </span>
-
-              <button
-                type="button"
-                className="secondary-button small-button"
-                onClick={handleLogout}
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="nav-auth">
-              <Link
-                to="/login"
-                className="secondary-button small-button"
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                className="primary-button small-button"
-              >
-                Register
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
 

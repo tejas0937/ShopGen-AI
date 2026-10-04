@@ -20,20 +20,11 @@ function Products() {
   } = useAuth();
 
   const [products, setProducts] = useState([]);
-
   const [search, setSearch] = useState("");
-
-  const [selectedCategory, setSelectedCategory] =
-    useState("All");
-
-  const [sortBy, setSortBy] =
-    useState("featured");
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [sortBy, setSortBy] = useState("featured");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function loadProducts() {
@@ -44,13 +35,10 @@ function Products() {
         const data = await fetchProducts();
 
         setProducts(
-          Array.isArray(data)
-            ? data
-            : []
+          Array.isArray(data) ? data : []
         );
       } catch (requestError) {
         console.error(requestError);
-
         setError(
           "Unable to load products right now."
         );
@@ -63,84 +51,67 @@ function Products() {
   }, []);
 
   const categories = useMemo(() => {
-    const categoryValues = [
+    const values = [
       ...new Set(
         products
-          .map(
-            (product) =>
-              product.category
-          )
+          .map((product) => product.category)
           .filter(Boolean)
       ),
     ];
 
-    return [
-      "All",
-      ...categoryValues,
-    ];
+    return ["All", ...values];
   }, [products]);
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearch =
-      search.trim().toLowerCase();
+    const query = search.trim().toLowerCase();
 
-    const filtered =
-      products.filter((product) => {
-        const searchText = [
-          product.title,
-          product.description,
-          product.category,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+    const filtered = products.filter((product) => {
+      const searchText = [
+        product.title,
+        product.description,
+        product.category,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-        const matchesSearch =
-          !normalizedSearch ||
-          searchText.includes(
-            normalizedSearch
-          );
+      const matchesSearch =
+        !query || searchText.includes(query);
 
-        const matchesCategory =
-          selectedCategory === "All" ||
-          product.category ===
-            selectedCategory;
+      const matchesCategory =
+        selectedCategory === "All" ||
+        product.category === selectedCategory;
 
+      return matchesSearch && matchesCategory;
+    });
+
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "price-low") {
         return (
-          matchesSearch &&
-          matchesCategory
-        );
-      });
-
-    return [...filtered].sort(
-      (a, b) => {
-        if (sortBy === "price-low") {
-          return (
-            Number(a.price) -
-            Number(b.price)
-          );
-        }
-
-        if (sortBy === "price-high") {
-          return (
-            Number(b.price) -
-            Number(a.price)
-          );
-        }
-
-        if (sortBy === "rating") {
-          return (
-            Number(b.rating) -
-            Number(a.rating)
-          );
-        }
-
-        return (
-          Number(b.rating_count) -
-          Number(a.rating_count)
+          Number(a.price) -
+          Number(b.price)
         );
       }
-    );
+
+      if (sortBy === "price-high") {
+        return (
+          Number(b.price) -
+          Number(a.price)
+        );
+      }
+
+      if (sortBy === "rating") {
+        return (
+          Number(b.rating) -
+          Number(a.rating)
+        );
+      }
+
+      return (
+        Number(b.rating_count) -
+        Number(a.rating_count)
+      );
+    });
   }, [
     products,
     search,
@@ -163,90 +134,46 @@ function Products() {
     setSortBy("featured");
   };
 
+  const scrollToCatalog = () => {
+    document
+      .getElementById("catalog")
+      ?.scrollIntoView({
+        behavior: "smooth",
+      });
+  };
+
   return (
-    <div className="shop-page">
-      {/* HERO */}
-      <section className="shop-hero">
-        <div className="shop-hero-grid" />
+    <div className="shop-page products-page">
+      {/* =====================================================
+          HERO
+          ===================================================== */}
 
-        <div className="shop-floating-shape shop-floating-shape-one" />
-        <div className="shop-floating-shape shop-floating-shape-two" />
+      
 
-        <div className="shop-hero-content">
-          <span className="hero-badge">
-            SHOPGEN MARKETPLACE
-          </span>
+      {/* =====================================================
+          CATALOG
+          ===================================================== */}
 
-          <h1>
-            Explore products
-            <span>
-              without the noise.
-            </span>
-          </h1>
-
-          <p>
-            Browse the ShopGen catalogue,
-            discover products you like and
-            build the signals that power your
-            AI recommendations.
-          </p>
-
-          <div className="shop-hero-actions">
-            <button
-              type="button"
-              className="hero-shop-button"
-              onClick={() =>
-                document
-                  .getElementById(
-                    "catalog"
-                  )
-                  ?.scrollIntoView({
-                    behavior: "smooth",
-                  })
-              }
-            >
-              Start browsing ↓
-            </button>
-
-            <button
-              type="button"
-              className="hero-ai-button"
-              onClick={
-                handleAiRecommendations
-              }
-            >
-              ✦ Ask AI
-            </button>
-          </div>
-        </div>
-
-        <div className="shop-hero-stat">
-          <strong>
-            {products.length || "—"}
-          </strong>
-
-          <span>
-            products available
-          </span>
-        </div>
-      </section>
-
-      {/* CATALOG */}
       <main
         className="shop-content"
         id="catalog"
       >
         <section className="catalog-panel">
-          <div className="catalog-panel-header">
+          <div className="catalog-heading">
             <div>
               <span className="section-label">
                 PRODUCT CATALOGUE
               </span>
 
               <h2>
-                Find something
-                <span> interesting.</span>
+                Browse the
+                <span> collection.</span>
               </h2>
+
+              <p>
+                Search products filter by category
+                and sort the catalogue your way.
+              </p>
             </div>
 
             <div className="catalog-count">
@@ -255,14 +182,13 @@ function Products() {
               </strong>
 
               <span>
-                results
+                of {products.length} products
               </span>
             </div>
           </div>
 
-          {/* SEARCH + SORT */}
           <div className="shop-toolbar">
-            <label className="search-wrapper">
+            <div className="search-wrapper">
               <span
                 className="search-icon"
                 aria-hidden="true"
@@ -272,13 +198,11 @@ function Products() {
 
               <input
                 type="search"
-                placeholder="Search products, categories or descriptions..."
                 value={search}
                 onChange={(event) =>
-                  setSearch(
-                    event.target.value
-                  )
+                  setSearch(event.target.value)
                 }
+                placeholder="Search products..."
                 aria-label="Search products"
               />
 
@@ -286,27 +210,21 @@ function Products() {
                 <button
                   type="button"
                   className="clear-search"
-                  onClick={() =>
-                    setSearch("")
-                  }
+                  onClick={() => setSearch("")}
                   aria-label="Clear search"
                 >
                   ×
                 </button>
               )}
-            </label>
+            </div>
 
-            <label className="category-filter">
-              <span>
-                Sort by
-              </span>
+            <label className="sort-wrapper">
+              <span>Sort</span>
 
               <select
                 value={sortBy}
                 onChange={(event) =>
-                  setSortBy(
-                    event.target.value
-                  )
+                  setSortBy(event.target.value)
                 }
               >
                 <option value="featured">
@@ -328,33 +246,36 @@ function Products() {
             </label>
           </div>
 
-          {/* CATEGORY FILTER */}
           <div className="category-strip">
-            {categories.map(
-              (category) => (
+            <span className="category-label">
+              Categories
+            </span>
+
+            <div className="category-chips">
+              {categories.map((category) => (
                 <button
                   key={category}
                   type="button"
                   className={
-                    selectedCategory ===
-                    category
+                    selectedCategory === category
                       ? "category-chip active"
                       : "category-chip"
                   }
                   onClick={() =>
-                    setSelectedCategory(
-                      category
-                    )
+                    setSelectedCategory(category)
                   }
                 >
                   {category}
                 </button>
-              )
-            )}
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* RESULTS HEADER */}
+        {/* =====================================================
+            RESULTS HEADER
+            ===================================================== */}
+
         {!loading && !error && (
           <div className="results-header">
             <div>
@@ -363,15 +284,14 @@ function Products() {
               </span>
 
               <h2>
-                Your product universe
+                Products you might
+                <span> love.</span>
               </h2>
 
               <p>
                 Showing{" "}
                 <strong>
-                  {
-                    filteredProducts.length
-                  }
+                  {filteredProducts.length}
                 </strong>{" "}
                 of{" "}
                 <strong>
@@ -384,9 +304,7 @@ function Products() {
             <button
               type="button"
               className="ai-link"
-              onClick={
-                handleAiRecommendations
-              }
+              onClick={handleAiRecommendations}
             >
               <span>✦</span>
               Personalize with AI
@@ -395,31 +313,37 @@ function Products() {
           </div>
         )}
 
-        {/* LOADING */}
+        {/* =====================================================
+            LOADING
+            ===================================================== */}
+
         {loading && (
           <div className="products-grid">
-            {Array.from({
-              length: 8,
-            }).map((_, index) => (
-              <div
-                className="product-card skeleton-card"
-                key={index}
-              >
-                <div className="skeleton skeleton-image" />
+            {Array.from({ length: 8 }).map(
+              (_, index) => (
+                <div
+                  className="product-card skeleton-card"
+                  key={index}
+                >
+                  <div className="skeleton skeleton-image" />
 
-                <div className="skeleton skeleton-small" />
+                  <div className="skeleton skeleton-small" />
 
-                <div className="skeleton skeleton-title" />
+                  <div className="skeleton skeleton-title" />
 
-                <div className="skeleton skeleton-text" />
+                  <div className="skeleton skeleton-text" />
 
-                <div className="skeleton skeleton-price" />
-              </div>
-            ))}
+                  <div className="skeleton skeleton-price" />
+                </div>
+              )
+            )}
           </div>
         )}
 
-        {/* ERROR */}
+        {/* =====================================================
+            ERROR
+            ===================================================== */}
+
         {!loading && error && (
           <div className="state-card error-state">
             <div className="state-icon">
@@ -430,9 +354,7 @@ function Products() {
               We hit a small bump
             </h3>
 
-            <p>
-              {error}
-            </p>
+            <p>{error}</p>
 
             <button
               type="button"
@@ -446,7 +368,10 @@ function Products() {
           </div>
         )}
 
-        {/* EMPTY */}
+        {/* =====================================================
+            EMPTY
+            ===================================================== */}
+
         {!loading &&
           !error &&
           filteredProducts.length === 0 && (
@@ -460,8 +385,8 @@ function Products() {
               </h3>
 
               <p>
-                Try a different search
-                or category.
+                We could not find anything matching
+                your current filters.
               </p>
 
               <button
@@ -474,23 +399,21 @@ function Products() {
             </div>
           )}
 
-        {/* PRODUCTS */}
+        {/* =====================================================
+            PRODUCTS
+            ===================================================== */}
+
         {!loading &&
           !error &&
-          filteredProducts.length >
-            0 && (
+          filteredProducts.length > 0 && (
             <div className="products-grid">
               {filteredProducts.map(
-                (
-                  product,
-                  index
-                ) => (
+                (product, index) => (
                   <article
                     className="product-card"
                     key={product.id}
                     style={{
-                      "--card-index":
-                        index,
+                      "--card-index": index,
                     }}
                   >
                     <button
@@ -503,27 +426,19 @@ function Products() {
                       }
                       aria-label={`View ${product.title}`}
                     >
-                      {/* IMAGE */}
                       <div className="product-image-wrapper">
                         <img
-                          src={
-                            product.image
-                          }
-                          alt={
-                            product.title
-                          }
+                          src={product.image}
+                          alt={product.title}
                           className="product-image"
                           loading="lazy"
                         />
 
                         <span className="product-category">
-                          {
-                            product.category
-                          }
+                          {product.category}
                         </span>
 
-                        {index <
-                          3 && (
+                        {index < 3 && (
                           <span className="product-ribbon">
                             Popular
                           </span>
@@ -534,38 +449,25 @@ function Products() {
                         </span>
                       </div>
 
-                      {/* BODY */}
                       <div className="product-card-body">
                         <div className="product-rating">
-                          <span>
-                            ★
-                          </span>
+                          <span>★</span>
 
                           <strong>
-                            {
-                              product.rating
-                            }
+                            {product.rating}
                           </strong>
 
                           <small>
-                            (
-                            {
-                              product.rating_count
-                            }
-                            )
+                            ({product.rating_count})
                           </small>
                         </div>
 
                         <h3 className="product-title">
-                          {
-                            product.title
-                          }
+                          {product.title}
                         </h3>
 
                         <p className="product-description">
-                          {
-                            product.description
-                          }
+                          {product.description}
                         </p>
 
                         <div className="product-card-footer">
@@ -573,16 +475,12 @@ function Products() {
                             $
                             {Number(
                               product.price
-                            ).toFixed(
-                              2
-                            )}
+                            ).toFixed(2)}
                           </span>
 
                           <span className="view-product">
                             View details
-                            <span>
-                              →
-                            </span>
+                            <span>→</span>
                           </span>
                         </div>
                       </div>
@@ -593,7 +491,10 @@ function Products() {
             </div>
           )}
 
-        {/* BOTTOM AI CTA */}
+        {/* =====================================================
+            AI BANNER
+            ===================================================== */}
+
         {!loading &&
           !error &&
           products.length > 0 && (
@@ -605,9 +506,7 @@ function Products() {
               </div>
 
               <div className="products-ai-content">
-                <span>
-                  SHOPGEN AI
-                </span>
+                <span>SHOPGEN AI</span>
 
                 <h2>
                   Not sure what to
@@ -615,18 +514,16 @@ function Products() {
                 </h2>
 
                 <p>
-                  Let AI use your browsing
-                  activity to find relevant
-                  products for you.
+                  Let ShopGen AI use your browsing
+                  activity to find products that
+                  match your interests.
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={
-                  handleAiRecommendations
-                }
                 className="products-ai-button"
+                onClick={handleAiRecommendations}
               >
                 Get recommendations
                 <span>→</span>

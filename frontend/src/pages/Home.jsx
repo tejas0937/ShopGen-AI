@@ -21,368 +21,289 @@ function Home() {
 
   return (
     <div className="home-page">
-      {/* HERO */}
-      <section className="hero">
-        <div className="hero-grid" />
+      <section className="home-hero">
+  <div className="home-hero-pattern" />
 
-        <div className="hero-decoration hero-decoration-one" />
-        <div className="hero-decoration hero-decoration-two" />
+  <div className="home-hero-orb home-hero-orb-one" />
+  <div className="home-hero-orb home-hero-orb-two" />
 
-        <div className="hero-decoration hero-decoration-three" />
+  <div className="home-shell">
+    <div className="home-hero-copy">
+      
 
-        <div className="hero-content">
-          <div className="hero-badge">
-            <span>✦</span>
-            GENERATIVE AI ECOMMERCE
-          </div>
+      <h1>
+        Discover products
+        <span>made to fit your taste.</span>
+      </h1>
 
-          <h1>
-            Find products
-            <br />
-            <span>that feel right.</span>
-          </h1>
+      <p>
+        ShopGen AI turns your product browsing into a
+        personalized shopping experience with smart
+        recommendations and clear AI explanations.
+      </p>
 
-          <p className="hero-description">
-            ShopGen AI combines intelligent product discovery
-            with personalized recommendations so you can shop
-            with less searching and more confidence.
-          </p>
+      <div className="home-hero-actions">
+        <button
+          type="button"
+          className="button button-primary"
+          onClick={() => navigate("/products")}
+        >
+          Explore products
+          <span>→</span>
+        </button>
 
-          <div className="hero-buttons">
-            <button
-              type="button"
-              className="primary-button"
-              onClick={() => navigate("/products")}
-            >
-              Explore Products
-              <span>→</span>
-            </button>
+        <button
+          type="button"
+          className="button button-light"
+          onClick={handleAiClick}
+        >
+          <span>✦</span>
+          Ask ShopGen AI
+        </button>
+      </div>
 
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={handleAiClick}
-            >
-              <span>✦</span>
-              Ask ShopGen AI
-            </button>
-          </div>
+      <div className="home-trust-row">
+        <div>
+          <strong>Smart</strong>
+          <span>discovery</span>
+        </div>
 
-          <div className="hero-proof">
+        <div>
+          <strong>Personalized</strong>
+          <span>recommendations</span>
+        </div>
+
+        <div>
+          <strong>AI</strong>
+          <span>explanations</span>
+        </div>
+      </div>
+    </div>
+
+    <div className="home-hero-cart" aria-hidden="true">
+      <div className="home-cart-glow" />
+
+      <img
+        src="/shopping-cart.png"
+        alt=""
+        className="home-cart-image"
+      />
+    </div>
+  </div>
+</section>
+      
+
+      <section className="home-section">
+        <div className="content-shell">
+          <div className="section-intro">
             <div>
-              <span className="proof-icon">✓</span>
-              <strong>Smart</strong>
-              discovery
+              <span className="section-kicker">
+                WHY SHOPGEN AI
+              </span>
+
+              <h2>
+                Everything you need for a{" "}
+                <span>
+                  smarter shopping journey.
+                </span>
+              </h2>
             </div>
 
-            <div>
-              <span className="proof-icon">✓</span>
-              <strong>Personalized</strong>
-              recommendations
-            </div>
-
-            <div>
-              <span className="proof-icon">✓</span>
-              <strong>AI</strong>
-              powered insights
-            </div>
-          </div>
-        </div>
-
-        {/* Floating AI Card */}
-        <div className="hero-floating-card hero-card-one">
-          <span className="floating-icon">✦</span>
-
-          <div>
-            <strong>AI Pick</strong>
-            <small>Personalized for you</small>
-          </div>
-        </div>
-
-        <div className="hero-floating-card hero-card-two">
-          <span className="floating-rating">★</span>
-
-          <div>
-            <strong>4.8</strong>
-            <small>Top rated</small>
-          </div>
-        </div>
-      </section>
-
-      {/* STATS */}
-      <section className="home-stats">
-        <div className="stats-container">
-          <div className="stat-item">
-            <strong>AI</strong>
-            <span>Powered recommendations</span>
+            <p>
+              A focused ecommerce experience built around
+              product discovery user activity and
+              personalized recommendations.
+            </p>
           </div>
 
-          <div className="stat-divider" />
-
-          <div className="stat-item">
-            <strong>6+</strong>
-            <span>Personalized product picks</span>
-          </div>
-
-          <div className="stat-divider" />
-
-          <div className="stat-item">
-            <strong>24/7</strong>
-            <span>Smart shopping assistant</span>
-          </div>
-
-          <div className="stat-divider" />
-
-          <div className="stat-item">
-            <strong>1</strong>
-            <span>Simple shopping experience</span>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="features-section">
-        <div className="section-heading">
-          <span className="section-eyebrow">
-            WHY SHOPGEN AI
-          </span>
-
-          <h2>
-            Shopping that
-            <span> adapts to you.</span>
-          </h2>
-
-          <p>
-            Explore products normally or let artificial
-            intelligence help you discover what comes next.
-          </p>
-        </div>
-
-        <div className="features">
-          <article className="feature-card feature-card-primary">
-            <div className="feature-top">
-              <span className="feature-number">
+          <div className="feature-grid">
+            <article className="feature-card feature-card-featured">
+              <span className="feature-index">
                 01
               </span>
 
-              <span className="feature-arrow">
-                ↗
-              </span>
-            </div>
+              <div className="feature-icon">
+                ⌕
+              </div>
 
-            <div className="feature-icon">
-              ⌕
-            </div>
+              <h3>
+                Discover faster
+              </h3>
 
-            <h3>
-              Discover faster
-            </h3>
+              <p>
+                Search and browse the catalogue with
+                clean categories and quick access to
+                product details.
+              </p>
 
-            <p>
-              Browse a clean product catalogue with
-              search, categories and sorting designed
-              for quick discovery.
-            </p>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() =>
+                  navigate("/products")
+                }
+              >
+                Explore catalogue →
+              </button>
+            </article>
 
-            <button
-              type="button"
-              onClick={() => navigate("/products")}
-              className="feature-link"
-            >
-              Explore catalogue →
-            </button>
-          </article>
-
-          <article className="feature-card">
-            <div className="feature-top">
-              <span className="feature-number">
+            <article className="feature-card">
+              <span className="feature-index">
                 02
               </span>
 
-              <span className="feature-arrow">
-                ↗
-              </span>
-            </div>
+              <div className="feature-icon feature-icon-soft">
+                ♡
+              </div>
 
-            <div className="feature-icon feature-icon-green">
-              ♡
-            </div>
+              <h3>
+                Learn your taste
+              </h3>
 
-            <h3>
-              Learn your taste
-            </h3>
+              <p>
+                Product views become preference signals
+                that help the recommendation engine
+                personalize results.
+              </p>
 
-            <p>
-              Your product interactions become useful
-              signals that help ShopGen understand
-              what you are interested in.
-            </p>
+              <button
+                type="button"
+                className="text-button"
+                onClick={handleAiClick}
+              >
+                Personalize with AI →
+              </button>
+            </article>
 
-            <button
-              type="button"
-              onClick={handleAiClick}
-              className="feature-link"
-            >
-              Personalize →
-            </button>
-          </article>
-
-          <article className="feature-card">
-            <div className="feature-top">
-              <span className="feature-number">
+            <article className="feature-card">
+              <span className="feature-index">
                 03
               </span>
 
-              <span className="feature-arrow">
-                ↗
+              <div className="feature-icon feature-icon-dark">
+                AI
+              </div>
+
+              <h3>
+                Understand the result
+              </h3>
+
+              <p>
+                See an AI generated explanation so your
+                recommendations feel clear instead of
+                random.
+              </p>
+
+              <button
+                type="button"
+                className="text-button"
+                onClick={handleAiClick}
+              >
+                See recommendations →
+              </button>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-how">
+        <div className="content-shell">
+          <div className="section-intro section-intro-dark">
+            <div>
+              <span className="section-kicker">
+                HOW IT WORKS
               </span>
-            </div>
 
-            <div className="feature-icon feature-icon-dark">
-              AI
+              <h2>
+                Simple inputs.{" "}
+                <span>
+                  Useful recommendations.
+                </span>
+              </h2>
             </div>
-
-            <h3>
-              Understand why
-            </h3>
 
             <p>
-              AI generated explanations help you
-              understand why a product has been
-              recommended.
-            </p>
-
-            <button
-              type="button"
-              onClick={handleAiClick}
-              className="feature-link"
-            >
-              Ask ShopGen AI →
-            </button>
-          </article>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="how-section">
-        <div className="how-header">
-          <span className="section-eyebrow">
-            HOW IT WORKS
-          </span>
-
-          <h2>
-            From browsing
-            <br />
-            to <span>better recommendations.</span>
-          </h2>
-        </div>
-
-        <div className="steps">
-          <div className="step">
-            <div className="step-number">
-              01
-            </div>
-
-            <div className="step-line" />
-
-            <h3>
-              Browse
-            </h3>
-
-            <p>
-              Explore products and discover what
-              catches your attention.
+              Browse products first. ShopGen AI then uses
+              your activity to produce a more relevant
+              product shortlist.
             </p>
           </div>
 
-          <div className="step">
-            <div className="step-number">
-              02
-            </div>
+          <div className="steps-grid">
+            <article className="step-card">
+              <span>01</span>
+              <h3>Browse</h3>
+              <p>
+                Explore products and find items that
+                catch your attention.
+              </p>
+            </article>
 
-            <div className="step-line" />
+            <article className="step-card">
+              <span>02</span>
+              <h3>Interact</h3>
+              <p>
+                Your authenticated product views create
+                useful signals.
+              </p>
+            </article>
 
-            <h3>
-              Interact
-            </h3>
+            <article className="step-card">
+              <span>03</span>
+              <h3>Personalize</h3>
+              <p>
+                The recommendation engine identifies
+                relevant categories.
+              </p>
+            </article>
 
-            <p>
-              Your product views create preference
-              signals for the recommendation engine.
-            </p>
-          </div>
-
-          <div className="step">
-            <div className="step-number">
-              03
-            </div>
-
-            <div className="step-line" />
-
-            <h3>
-              Personalize
-            </h3>
-
-            <p>
-              ShopGen AI identifies relevant categories
-              and products for your next visit.
-            </p>
-          </div>
-
-          <div className="step">
-            <div className="step-number">
-              04
-            </div>
-
-            <h3>
-              Discover
-            </h3>
-
-            <p>
-              Get a curated set of recommendations
-              with an AI generated explanation.
-            </p>
+            <article className="step-card">
+              <span>04</span>
+              <h3>Discover</h3>
+              <p>
+                Return to see curated picks with an AI
+                generated reason.
+              </p>
+            </article>
           </div>
         </div>
       </section>
 
-      {/* AI CTA */}
-      <section className="cta-section">
-        <div className="cta-glow" />
+      <section className="home-final-cta">
+        <div className="content-shell final-cta-inner">
+          <div>
+            <span className="section-kicker section-kicker-light">
+              YOUR PERSONAL SHOPPING ASSISTANT
+            </span>
 
-        <div className="cta-decoration cta-decoration-one" />
-        <div className="cta-decoration cta-decoration-two" />
+            <h2>
+              Your next favourite product could be one
+              click away.
+            </h2>
 
-        <div className="cta-content">
-          <span className="cta-label">
-            ✦ YOUR PERSONAL SHOPPING ASSISTANT
-          </span>
+            <p>
+              Start with the catalogue then let ShopGen AI
+              take it from there.
+            </p>
+          </div>
 
-          <h2>
-            Your next favourite
-            <span> product is waiting.</span>
-          </h2>
-
-          <p>
-            Explore the catalogue and let ShopGen AI
-            help you find products worth discovering.
-          </p>
-
-          <div className="cta-buttons">
+          <div className="final-cta-actions">
             <button
               type="button"
-              className="primary-button"
-              onClick={() => navigate("/products")}
+              className="button button-white"
+              onClick={() =>
+                navigate("/products")
+              }
             >
-              Explore Products →
+              Explore products →
             </button>
 
             <button
               type="button"
-              className="cta-secondary-button"
+              className="button button-outline-light"
               onClick={handleAiClick}
             >
-              ✦ Get AI Recommendations
+              ✦ Get AI recommendations
             </button>
           </div>
         </div>
