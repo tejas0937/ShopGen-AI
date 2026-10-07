@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import "../App.css";
 import { useAuth } from "../context/AuthContext";
 
 function Home() {
@@ -9,6 +10,17 @@ function Home() {
     user,
     requestLoginPrompt,
   } = useAuth();
+
+  const [showCookiePopup, setShowCookiePopup] =
+    useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowCookiePopup(true);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleAiClick = () => {
     if (!user) {
@@ -21,77 +33,127 @@ function Home() {
 
   return (
     <div className="home-page">
+
+      {/* Cookie Popup */}
+      {showCookiePopup && (
+        <div className="cookie-popup-overlay">
+          <div className="cookie-popup">
+            <button
+              type="button"
+              className="cookie-popup-close"
+              onClick={() =>
+                setShowCookiePopup(false)
+              }
+              aria-label="Close"
+            >
+              ×
+            </button>
+
+            <div className="cookie-popup-icon">
+              🍪
+            </div>
+
+            <h2>
+              Enable cookies
+            </h2>
+
+            <p>
+              ShopGen AI uses cookies to keep you
+              signed in and provide personalized
+              recommendations.
+            </p>
+
+            <p>
+              Please allow third party cookies in
+              your browser for login and AI
+              recommendations to work correctly.
+            </p>
+
+            <button
+              type="button"
+              className="button button-primary cookie-popup-button"
+              onClick={() =>
+                setShowCookiePopup(false)
+              }
+            >
+              I've enabled cookies
+            </button>
+          </div>
+        </div>
+      )}
+
       <section className="home-hero">
-  <div className="home-hero-pattern" />
+        <div className="home-hero-pattern" />
 
-  <div className="home-hero-orb home-hero-orb-one" />
-  <div className="home-hero-orb home-hero-orb-two" />
+        <div className="home-hero-orb home-hero-orb-one" />
+        <div className="home-hero-orb home-hero-orb-two" />
 
-  <div className="home-shell">
-    <div className="home-hero-copy">
-      
+        <div className="home-shell">
+          <div className="home-hero-copy">
 
-      <h1>
-        Discover products
-        <span>made to fit your taste.</span>
-      </h1>
+            <h1>
+              Discover products
+              <span>made to fit your taste.</span>
+            </h1>
 
-      <p>
-        ShopGen AI turns your product browsing into a
-        personalized shopping experience with smart
-        recommendations and clear AI explanations.
-      </p>
+            <p>
+              ShopGen AI turns your product browsing into a
+              personalized shopping experience with smart
+              recommendations and clear AI explanations.
+            </p>
 
-      <div className="home-hero-actions">
-        <button
-          type="button"
-          className="button button-primary"
-          onClick={() => navigate("/products")}
-        >
-          Explore products
-          <span>→</span>
-        </button>
+            <div className="home-hero-actions">
+              <button
+                type="button"
+                className="button button-primary"
+                onClick={() => navigate("/products")}
+              >
+                Explore products
+                <span>→</span>
+              </button>
 
-        <button
-          type="button"
-          className="button button-light"
-          onClick={handleAiClick}
-        >
-          <span>✦</span>
-          Ask ShopGen AI
-        </button>
-      </div>
+              <button
+                type="button"
+                className="button button-light"
+                onClick={handleAiClick}
+              >
+                <span>✦</span>
+                Ask ShopGen AI
+              </button>
+            </div>
 
-      <div className="home-trust-row">
-        <div>
-          <strong>Smart</strong>
-          <span>discovery</span>
+            <div className="home-trust-row">
+              <div>
+                <strong>Smart</strong>
+                <span>discovery</span>
+              </div>
+
+              <div>
+                <strong>Personalized</strong>
+                <span>recommendations</span>
+              </div>
+
+              <div>
+                <strong>AI</strong>
+                <span>explanations</span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="home-hero-cart"
+            aria-hidden="true"
+          >
+            <div className="home-cart-glow" />
+
+            <img
+              src="/shopping-cart.png"
+              alt=""
+              className="home-cart-image"
+            />
+          </div>
         </div>
-
-        <div>
-          <strong>Personalized</strong>
-          <span>recommendations</span>
-        </div>
-
-        <div>
-          <strong>AI</strong>
-          <span>explanations</span>
-        </div>
-      </div>
-    </div>
-
-    <div className="home-hero-cart" aria-hidden="true">
-      <div className="home-cart-glow" />
-
-      <img
-        src="/shopping-cart.png"
-        alt=""
-        className="home-cart-image"
-      />
-    </div>
-  </div>
-</section>
-      
+      </section>
 
       <section className="home-section">
         <div className="content-shell">
